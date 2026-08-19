@@ -1,0 +1,76 @@
+{
+  "_source": "Madrigal Pharmaceuticals (MDGL) Q1 2026 earnings call, 6 May 2026.",
+  "_caveat": "DEMO FIXTURE. Unlike the Q2 file, these entries were assembled from published Q1 summaries rather than a parsed transcript, so `quote` holds the reported statement rather than a verified verbatim span. Sufficient to exercise the quarter-over-quarter diff; NOT part of the eval set. Replace by running `make fetch && make run` against a real Q1 transcript.",
+  "claims": [
+    {
+      "claim": "Rezdiffra Q1 net sales were $311.3M, up 127% year over year, with more than 42,250 active patients.",
+      "quote": "First quarter 2026 net sales totaled $311.3 million, up 127% year-over-year",
+      "passage_idx": 8,
+      "speaker": "Mardi Dier",
+      "signal_type": "commercial_trajectory",
+      "affected_holdings": ["MDGL"],
+      "linkage": "named_asset",
+      "entities": {"drugs": ["Rezdiffra"], "mechanisms": ["THR-beta"], "indications": ["MASH F2-F3"], "trials": [], "companies": ["Madrigal"]},
+      "materiality": 0.45,
+      "reasoning": "Baseline commercial performance, in line with trajectory.",
+      "transcription_note": null,
+      "section": "prepared"
+    },
+    {
+      "claim": "Management guided the F4c outcomes trial to a 2027 readout.",
+      "quote": "the F4c outcomes trial is tracking toward a 2027 readout",
+      "passage_idx": 22,
+      "speaker": "David Allegretti",
+      "signal_type": "timeline_change",
+      "affected_holdings": ["MDGL"],
+      "linkage": "named_asset",
+      "entities": {"drugs": ["resmetirom"], "mechanisms": ["THR-beta"], "indications": ["MASH F4c"], "trials": ["MAESTRO Outcomes"], "companies": ["Madrigal"]},
+      "materiality": 0.6,
+      "reasoning": "Reiterated guidance, no change from prior quarters.",
+      "transcription_note": null,
+      "section": "qa"
+    },
+    {
+      "claim": "Management reported no meaningful impact from Wegovy entering the MASH market.",
+      "quote": "no meaningful impact from Wegovy entering the MASH market",
+      "passage_idx": 25,
+      "speaker": "Bill Sibold",
+      "signal_type": "competitive_positioning",
+      "affected_holdings": ["MDGL"],
+      "linkage": "shared_indication",
+      "entities": {"drugs": ["Wegovy", "semaglutide"], "mechanisms": ["GLP-1"], "indications": ["MASH F2-F3"], "trials": [], "companies": ["Novo Nordisk"]},
+      "materiality": 0.6,
+      "reasoning": "Dismissive framing of GLP-1 encroachment; no defensive argument offered.",
+      "transcription_note": null,
+      "section": "qa"
+    },
+    {
+      "claim": "Madrigal highlighted a newly added ARO-PNPLA3 siRNA asset within an expanded MASH pipeline.",
+      "quote": "expanded the MASH pipeline to more than 10 programs, highlighting the new ARO-PNPLA3 siRNA asset",
+      "passage_idx": 18,
+      "speaker": "David Allegretti",
+      "signal_type": "clinical_readout",
+      "affected_holdings": ["MDGL"],
+      "linkage": "named_asset",
+      "entities": {"drugs": ["ARO-PNPLA3"], "mechanisms": ["PNPLA3", "siRNA"], "indications": ["MASH F2-F3"], "trials": [], "companies": ["Arrowhead", "Madrigal"]},
+      "materiality": 0.55,
+      "reasoning": "Signals a move toward combination strategy.",
+      "transcription_note": null,
+      "section": "prepared"
+    },
+    {
+      "claim": "Gross-to-net discount guided to the mid-to-high 30s for the remainder of 2026.",
+      "quote": "we now expect our gross-to-net discount to be in the mid to high thirties for the rest of 2026",
+      "passage_idx": 10,
+      "speaker": "Mardi Dier",
+      "signal_type": "commercial_trajectory",
+      "affected_holdings": ["MDGL"],
+      "linkage": "named_asset",
+      "entities": {"drugs": ["Rezdiffra"], "mechanisms": [], "indications": ["MASH F2-F3"], "trials": [], "companies": ["Madrigal"]},
+      "materiality": 0.4,
+      "reasoning": "Routine guidance on net pricing.",
+      "transcription_note": null,
+      "section": "prepared"
+    }
+  ]
+}

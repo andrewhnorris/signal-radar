@@ -1,0 +1,94 @@
+# RTW portfolio watchlist.
+#
+# "Important" is defined here as a composite, not position size alone:
+#   1. Dollar value of the position (13F)
+#   2. Weight as % of the disclosed equity book (concentration = conviction)
+#   3. Ownership as % of shares outstanding (a 9% stake is a different
+#      relationship than a 0.4% stake, even at the same dollar value)
+#   4. Near-term catalyst density (a name with a Phase 3 readout in the next
+#      two quarters is more sensitive to competitor commentary than a name
+#      whose next event is in 2028)
+#
+# Known limits of this basis, stated up front:
+#   - 13F is filed 45 days after quarter end. It is stale by construction.
+#   - 13F covers long US-listed equity only. It excludes RTW's private/venture
+#     book, non-US listings, and any short or derivative exposure.
+#   - Therefore this file is a CURATED ARTEFACT, seeded from 13F and finished
+#     by hand. It is meant to be edited by an analyst, not auto-derived.
+#
+# Source: RTW Investments LP 13F-HR, CIK 0001493215.
+
+meta:
+  source_13f: "CIK 0001493215"
+  as_of: "2026-03-31"
+  curated_by: "analyst (hand-finished)"
+
+holdings:
+  - ticker: MDGL
+    name: Madrigal Pharmaceuticals
+    tier: 1
+    rationale: >
+      Largest disclosed position. Single-asset commercial story: essentially all
+      near-term value sits in one franchise, so competitor commentary in one
+      indication moves the whole thesis.
+    assets:
+      - name: Rezdiffra
+        inn: resmetirom
+        mechanism: THR-beta agonist
+        stage: approved
+      - name: MGL-2086
+        mechanism: oral GLP-1
+        stage: phase 1
+      - name: ervogastat
+        mechanism: DGAT2 inhibitor
+        stage: preclinical (combo)
+      - name: MGL-0795
+        mechanism: PNPLA3 siRNA
+        stage: phase 1 (in-licensed)
+    indications: [MASH F2-F3, MASH F4c, MASLD]
+    mechanisms: [THR-beta, FGF21, pan-PPAR, GLP-1, DGAT2, PNPLA3, siRNA]
+    catalysts:
+      - {event: "MAESTRO Outcomes F4c readout", window: "2027", type: clinical}
+      - {event: "MAESTRO-NASH F2-F3 readout", window: "2028", type: clinical}
+    named_competitors: [IVA, NVO, LLY, VKTX, ETNB, ARWR]
+
+  - ticker: IVA
+    name: Inventiva
+    tier: 1
+    rationale: >
+      New position. Binary Phase 3 readout inside the current two-quarter window,
+      in the same indication as the largest holding. Highest catalyst density in
+      the book and directly coupled to MDGL - see docs/worked_example.md.
+    assets:
+      - name: lanifibranor
+        mechanism: pan-PPAR agonist
+        stage: phase 3
+    indications: [MASH F2-F3]
+    mechanisms: [pan-PPAR, THR-beta, GLP-1, SGLT2]
+    catalysts:
+      - {event: "NATiV3 Phase 3 topline", window: "H2 2026", type: clinical}
+    named_competitors: [MDGL, NVO, LLY, ETNB, VKTX]
+
+  # --- Tier 2: sized in, tracked, lower catalyst density this window ---
+  - {ticker: INSM, name: Insmed, tier: 2, indications: [bronchiectasis, NTM lung disease, PAH], mechanisms: [DPP1 inhibitor, prostacyclin, inhaled therapy], named_competitors: [UTHR, MRK, LQDA, GOSS]}
+  - {ticker: PTCT, name: PTC Therapeutics, tier: 2, indications: [PKU, Duchenne, Huntington], mechanisms: [splicing modulator, gene therapy, small molecule], named_competitors: [BMRN, SRPT, JAZZ]}
+  - {ticker: ARGX, name: argenx, tier: 2, indications: [gMG, CIDP, ITP], mechanisms: [FcRn antagonist], named_competitors: [UCB, JNJ, IMVT, ALXN]}
+  - {ticker: PTGX, name: Protagonist Therapeutics, tier: 2, indications: [polycythemia vera, psoriasis, obesity], mechanisms: [hepcidin mimetic, IL-23 antagonist, peptide], named_competitors: [JNJ, TAK, MRK]}
+  - {ticker: RYTM, name: Rhythm Pharmaceuticals, tier: 2, indications: [hypothalamic obesity, MC4R obesity], mechanisms: [MC4R agonist, GLP-1], named_competitors: [NVO, LLY, SLDB]}
+  - {ticker: IMVT, name: Immunovant, tier: 2, indications: [gMG, Graves disease, CIDP], mechanisms: [FcRn antagonist], named_competitors: [ARGX, JNJ, UCB]}
+  - {ticker: PODD, name: Insulet, tier: 2, indications: [type 1 diabetes, type 2 diabetes], mechanisms: [insulin pump, CGM integration, closed loop], named_competitors: [DXCM, MDT, TNDM, ABT]}
+  - {ticker: ISRG, name: Intuitive Surgical, tier: 2, indications: [soft tissue surgery], mechanisms: [surgical robotics], named_competitors: [JNJ, MDT, SYK]}
+
+# Competitor universe: whose calls we ingest. A company earns a slot by sharing
+# an INDICATION or a MECHANISM with a holding - not by being a "peer" in the
+# abstract. Novo is here because it owns two MASH mechanisms, not because it is
+# a large pharma.
+competitor_universe:
+  - {ticker: NVO,  name: Novo Nordisk,        why: "semaglutide in MASH; acquired Akero (FGF21/efruxifermin) Oct 2025"}
+  - {ticker: LLY,  name: Eli Lilly,           why: "tirzepatide/retatrutide in MASH and obesity"}
+  - {ticker: ETNB, name: 89bio,               why: "pegozafermin, FGF21 in MASH"}
+  - {ticker: VKTX, name: Viking Therapeutics, why: "VK2809, THR-beta - same mechanism as Rezdiffra"}
+  - {ticker: ARWR, name: Arrowhead,           why: "PNPLA3 siRNA; MDGL licensor and potential competitor"}
+  - {ticker: UTHR, name: United Therapeutics, why: "PAH - overlaps INSM TPIP"}
+  - {ticker: DXCM, name: Dexcom,              why: "CGM - overlaps PODD closed loop"}
+  - {ticker: BMRN, name: BioMarin,            why: "PKU - overlaps PTCT sepiapterin"}

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+# Third-party transcript content is NOT committed - see README "Data & licensing"
+data/transcripts/*
+!data/transcripts/.gitkeep
+out/
