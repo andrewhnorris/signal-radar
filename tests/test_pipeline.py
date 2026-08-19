@@ -40,6 +40,50 @@ def test_configs_load_and_validate():
     assert cfg["alert_threshold"] > cfg["watch_threshold"]
 
 
+def test_alias_map_resolves_renamed_asset():
+    from signal_radar.config import load_aliases
+    a = load_aliases()
+    # The live false positive this map was built to fix.
+    assert a.canonical("ARO-PNPLA3") == a.canonical("MGL-0795")
+    assert a.canonical("Rezdiffra") == a.canonical("resmetirom")
+    assert a.canonical("NASH") == a.canonical("MASH")
+    assert a.canonical("Wegovy") == "semaglutide"
+    # Unknown terms pass through rather than being silently dropped.
+    assert a.canonical("not-a-real-drug") == "not-a-real-drug"
+
+
+def test_renamed_asset_not_reported_as_dropped():
+    from signal_radar.diff import dropped_topics
+    from signal_radar.extract import Claim
+
+    def mk(drug):
+        return Claim(claim="x", quote="x", passage_idx=1, speaker="s",
+                     signal_type="clinical_readout", affected_holdings=["MDGL"],
+                     linkage="named_asset", materiality=0.5, reasoning="r",
+                     entities={"drugs": [drug]})
+
+    assert dropped_topics([mk("MGL-0795")], [mk("ARO-PNPLA3")]) == []
+    assert dropped_topics([mk("MGL-0795")], [mk("ervogastat")]) == ["ervogastat"]
+
+
+def test_13f_parses_and_ranks():
+    import sys
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "scripts"))
+    from ingest_13f import aggregate, detect_value_scale, parse_info_table
+
+    xml = (root / "data" / "13f" / "sample_information_table.xml").read_text()
+    rows = parse_info_table(xml)
+    assert len(rows) == 15
+    scale, _ = detect_value_scale(rows)
+    positions = aggregate(rows, scale)
+    assert positions[0].issuer.startswith("MADRIGAL")
+    # Ranked descending by value.
+    assert all(positions[i].value >= positions[i + 1].value
+               for i in range(len(positions) - 1))
+
+
 if __name__ == "__main__":
     # Runnable without pytest installed: `python tests/test_pipeline.py`
     import traceback

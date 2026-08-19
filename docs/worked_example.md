@@ -114,7 +114,7 @@ Speaker, section, verbatim quote, passage index. **An analyst can verify it in o
 
 - **The Q1 2026 fixture is reconstructed** from published summaries, not a parsed transcript. Adequate to exercise the quarter-over-quarter diff; not part of the eval set.
 - **Eval is 20 hand-labelled rows on one company.** It measures whether ranking puts the right things on top. It does not measure whether extraction found everything — that is the recall question, and it is unanswered.
-- **One known false positive is instructive**: Q1 called the Arrowhead asset `ARO-PNPLA3`; Q2 calls it `MGL-0795` after in-licensing. The "went quiet" detector reads a renamed asset as a dropped program. Entity resolution across renaming is a real gap, not a rough edge.
+- **One false positive, found and fixed**: Q1 called the Arrowhead asset `ARO-PNPLA3`; Q2 calls it `MGL-0795` after in-licensing, and the "went quiet" detector reported a renamed asset as a dropped programme. `config/aliases.yaml` now resolves programme identity before comparison. The map is hand-maintained and will be incomplete on names outside the sample.
 - **No causal claim.** Price moves after a flagged signal are confounded by everything else in the quarter. This deck asserts the signals are material on their merits, not that they were tradeable.
 
 ---

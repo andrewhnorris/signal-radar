@@ -1,4 +1,4 @@
-.PHONY: demo run test eval fetch clean
+.PHONY: demo run test eval seed fetch clean
 
 # Zero-setup demo: runs the full pipeline on cached model output. No API key needed.
 demo:
@@ -11,6 +11,9 @@ run:
 
 fetch:
 	PYTHONPATH=src python -m signal_radar.cli fetch
+
+seed:
+	python scripts/ingest_13f.py --xml data/13f/sample_information_table.xml --top 10
 
 test:
 	python tests/test_pipeline.py

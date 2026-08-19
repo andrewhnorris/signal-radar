@@ -20,6 +20,7 @@ from __future__ import annotations
 import re
 from difflib import SequenceMatcher
 
+from .config import AliasMap, load_aliases
 from .extract import Claim
 
 # Phrases that mark a statement as hedged. Their APPEARANCE between quarters is
@@ -52,16 +53,22 @@ def _keys(claim: Claim) -> list[tuple]:
     return [(claim.signal_type, h) for h in claim.affected_holdings]
 
 
-def _entities(claim: Claim) -> set[str]:
-    """Flatten the entity payload into a comparable bag.
+def _entities(claim: Claim, aliases: AliasMap | None = None) -> set[str]:
+    """Flatten the entity payload into a comparable bag, canonicalised.
 
     Entities are the stable identity of a topic across quarters. The `claim`
     field is the model's paraphrase and rewords itself run to run; the trial
-    name and the drug name do not.
+    name and the drug name do not - provided they are resolved through the
+    alias map first. Without that, "ARO-PNPLA3" and "MGL-0795" are two
+    different assets and the same programme looks new every time it is renamed.
     """
     out: set[str] = set()
     for field_name in ("trials", "drugs", "indications", "mechanisms"):
-        out |= {v.lower().strip() for v in claim.entities.get(field_name, []) if v}
+        vals = [v for v in claim.entities.get(field_name, []) if v]
+        if aliases is not None:
+            out |= {c.lower() for c in aliases.canonical_set(vals)}
+        else:
+            out |= {v.lower().strip() for v in vals}
     return out
 
 
@@ -71,14 +78,15 @@ def _jaccard(a: set[str], b: set[str]) -> float:
     return len(a & b) / len(a | b)
 
 
-def _topic_match(c: Claim, p: Claim) -> float:
+def _topic_match(c: Claim, p: Claim, aliases: AliasMap | None = None) -> float:
     """How likely two claims are about the same running topic.
 
     Weighted toward entities over prose for the reason above, but text
     similarity still contributes so that two claims about the same trial but
     genuinely different subjects do not collapse together.
     """
-    return 0.65 * _jaccard(_entities(c), _entities(p)) + 0.35 * _similarity(c.claim, p.claim)
+    return (0.65 * _jaccard(_entities(c, aliases), _entities(p, aliases))
+            + 0.35 * _similarity(c.claim, p.claim))
 
 
 TOPIC_THRESHOLD = 0.30
@@ -104,7 +112,8 @@ def _similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, _norm(a), _norm(b)).ratio()
 
 
-def classify_novelty(current: list[Claim], prior: list[Claim]) -> list[Claim]:
+def classify_novelty(current: list[Claim], prior: list[Claim],
+                     aliases: AliasMap | None = None) -> list[Claim]:
     """Tag each current claim as new / changed / repeated / unknown.
 
     Also writes a human-readable `delta` onto changed claims so the digest can
@@ -112,6 +121,8 @@ def classify_novelty(current: list[Claim], prior: list[Claim]) -> list[Claim]:
     explanation gets ignored; a flag that says "date acquired three new hedges"
     gets clicked.
     """
+    aliases = aliases if aliases is not None else load_aliases()
+
     if not prior:
         for c in current:
             c.novelty = "unknown"
@@ -135,8 +146,8 @@ def classify_novelty(current: list[Claim], prior: list[Claim]) -> list[Claim]:
             c.novelty = "new"
             continue
 
-        best = max(candidates, key=lambda p: _topic_match(c, p))
-        match = _topic_match(c, best)
+        best = max(candidates, key=lambda p: _topic_match(c, p, aliases))
+        match = _topic_match(c, best, aliases)
 
         if match < TOPIC_THRESHOLD:
             c.novelty = "new"
@@ -168,15 +179,22 @@ def classify_novelty(current: list[Claim], prior: list[Claim]) -> list[Claim]:
     return current
 
 
-def dropped_topics(current: list[Claim], prior: list[Claim]) -> list[str]:
+def dropped_topics(current: list[Claim], prior: list[Claim],
+                   aliases: AliasMap | None = None) -> list[str]:
     """Programs discussed last quarter and absent this quarter.
 
     Silence is a signal. A pipeline asset that vanishes from the script between
     quarters is often the first observable sign of a deprioritisation, and it is
     invisible to any approach that only reads what was said.
-    """
-    def drugs(claims: list[Claim]) -> set[str]:
-        return {d.lower() for c in claims for d in c.entities.get("drugs", []) if d}
 
-    gone = drugs(prior) - drugs(current)
-    return sorted(gone)
+    Names are canonicalised first. An asset that was renamed between quarters
+    is the same programme and must not be reported as having gone quiet - this
+    was a live false positive before the alias map existed.
+    """
+    aliases = aliases if aliases is not None else load_aliases()
+
+    def drugs(claims: list[Claim]) -> set[str]:
+        return {d for c in claims
+                for d in aliases.canonical_set(c.entities.get("drugs", []))}
+
+    return sorted(drugs(prior) - drugs(current))

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ABRIDGED TEST FIXTURE - offline sample for scripts/ingest_13f.py.
+  Structure matches a real EDGAR 13F-HR information table exactly.
+  Issuer names and approximate weights reflect the public RTW filing;
+  CUSIPs are PLACEHOLDERS and share counts are illustrative.
+  For real output, run ingest_13f.py against EDGAR CIK 1493215.
+-->
+<informationTable xmlns="http://www.sec.gov/edgar/document/thirteenf/informationtable">
+    <infoTable>
+        <nameOfIssuer>MADRIGAL PHARMACEUTICALS INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000MDGL0</cusip>
+        <value>1012400000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>2130000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>2130000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>INSMED INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000INSM0</cusip>
+        <value>842100000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>8940000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>8940000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>PTC THERAPEUTICS INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000PTCT0</cusip>
+        <value>701500000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>12300000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>12300000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>ARGENX SE</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000ARGX0</cusip>
+        <value>688900000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>1020000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>1020000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>PROTAGONIST THERAPEUTICS INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000PTGX0</cusip>
+        <value>612300000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>10450000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>10450000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>RHYTHM PHARMACEUTICALS INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000RYTM0</cusip>
+        <value>455800000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>7210000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>7210000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>IMMUNOVANT INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000IMVT0</cusip>
+        <value>401200000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>13600000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>13600000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>INSULET CORP</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000PODD0</cusip>
+        <value>388700000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>1240000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>1240000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>INTUITIVE SURGICAL INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000ISRG0</cusip>
+        <value>352100000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>690000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>690000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>INVENTIVA SA</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000IVA00</cusip>
+        <value>318400000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>29800000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>29800000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>KYMERA THERAPEUTICS INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000KYMR0</cusip>
+        <value>241600000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>5120000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>5120000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>COGENT BIOSCIENCES INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000COGT0</cusip>
+        <value>208300000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>16900000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>16900000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>CELCUITY INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000CELC0</cusip>
+        <value>176400000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>4030000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>4030000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>TANGO THERAPEUTICS INC</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000TNGX0</cusip>
+        <value>131900000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>19400000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>19400000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+    <infoTable>
+        <nameOfIssuer>ZAI LAB LTD</nameOfIssuer>
+        <titleOfClass>COM</titleOfClass>
+        <cusip>000ZLAB0</cusip>
+        <value>118200000</value>
+        <shrsOrPrnAmt>
+            <sshPrnamt>3310000</sshPrnamt>
+            <sshPrnamtType>SH</sshPrnamtType>
+        </shrsOrPrnAmt>
+        <investmentDiscretion>SOLE</investmentDiscretion>
+        <votingAuthority>
+            <Sole>3310000</Sole>
+            <Shared>0</Shared>
+            <None>0</None>
+        </votingAuthority>
+    </infoTable>
+</informationTable>

@@ -1,0 +1,110 @@
+# Asset and entity aliases.
+#
+# Why this file exists: a drug is not a string. The same programme is referred to
+# by internal code, generic name, brand name, and licensor code - and the label
+# changes when an asset is in-licensed or a company is acquired. Matching on raw
+# strings makes the system report a renamed asset as a dropped programme, and
+# makes it miss a competitor that started using a different name for the same
+# molecule.
+#
+# Observed in the sample data:
+#   - Madrigal called the Arrowhead siRNA "ARO-PNPLA3" in Q1 2026 and
+#     "MGL-0795" in Q2 2026 after in-licensing. The quarter-over-quarter diff
+#     read this as a deprioritised programme. It is the same asset.
+#   - Rivals say "resmetirom"; Madrigal says "Rezdiffra".
+#   - Akero's "efruxifermin" / "EFX" now sits inside Novo Nordisk.
+#
+# Format: canonical name, then every string seen in the wild that means it.
+# Matching is case-insensitive and applied to model-extracted entities before
+# any comparison.
+
+assets:
+  resmetirom:
+    aliases: [Rezdiffra, resmetirom, MGL-3196, MGL3196]
+    owner: MDGL
+    mechanism: THR-beta
+
+  MGL-0795:
+    aliases: [MGL-0795, MGL0795, ARO-PNPLA3, AROPNPLA3, ARO PNPLA3]
+    owner: MDGL
+    licensor: ARWR
+    mechanism: PNPLA3 siRNA
+    note: "Renamed on in-licensing from Arrowhead, Q2 2026."
+
+  MGL-2086:
+    aliases: [MGL-2086, MGL2086]
+    owner: MDGL
+    mechanism: oral GLP-1
+
+  ervogastat:
+    aliases: [ervogastat, PF-06865571]
+    owner: MDGL
+    origin: PFE
+    mechanism: DGAT2 inhibitor
+
+  lanifibranor:
+    aliases: [lanifibranor, IVA337, IVA-337]
+    owner: IVA
+    mechanism: pan-PPAR
+
+  efruxifermin:
+    aliases: [efruxifermin, EFX, AKR-001, AKR001]
+    owner: NVO
+    former_owner: AKRO
+    mechanism: FGF21
+    note: "Akero acquired by Novo Nordisk, announced Oct 2025."
+
+  semaglutide:
+    aliases: [semaglutide, Wegovy, Ozempic, Rybelsus]
+    owner: NVO
+    mechanism: GLP-1
+
+  tirzepatide:
+    aliases: [tirzepatide, Mounjaro, Zepbound]
+    owner: LLY
+    mechanism: GLP-1/GIP
+
+  pegozafermin:
+    aliases: [pegozafermin, BIO89-100, BIO89100]
+    owner: ETNB
+    mechanism: FGF21
+
+  brensocatib:
+    aliases: [brensocatib, Brinsupri]
+    owner: INSM
+    mechanism: DPP1 inhibitor
+
+# Indication synonyms. MASH and NASH are the same disease and companies use both
+# interchangeably, sometimes in adjacent sentences on the same call. Fibrosis
+# stages are NOT collapsed - they are distinct commercial segments.
+indications:
+  MASH:
+    aliases: [MASH, NASH, metabolic dysfunction-associated steatohepatitis,
+              non-alcoholic steatohepatitis, nonalcoholic steatohepatitis]
+  MASLD:
+    aliases: [MASLD, NAFLD, metabolic dysfunction-associated steatotic liver disease,
+              non-alcoholic fatty liver disease]
+  MASH F2-F3:
+    aliases: [MASH F2-F3, F2/F3, F2-F3, pre-cirrhotic MASH, noncirrhotic MASH,
+              non-cirrhotic MASH]
+  MASH F4c:
+    aliases: [MASH F4c, F4c, F4-C, compensated cirrhosis, MASH cirrhosis,
+              compensated MASH cirrhosis]
+
+# Mechanism class synonyms. Used for shared_mechanism linkage, which is how the
+# system catches a competitor that never says a portfolio company's name.
+mechanisms:
+  THR-beta:
+    aliases: [THR-beta, THR beta, thyroid hormone receptor beta, THRb, THR-B]
+  FGF21:
+    aliases: [FGF21, FGF-21, fibroblast growth factor 21]
+  pan-PPAR:
+    aliases: [pan-PPAR, panPPAR, PPAR, peroxisome proliferator-activated receptor]
+  GLP-1:
+    aliases: [GLP-1, GLP1, glucagon-like peptide-1, incretin]
+  PNPLA3:
+    aliases: [PNPLA3, PNPLA-3]
+  siRNA:
+    aliases: [siRNA, small interfering RNA, RNAi]
+  DGAT2:
+    aliases: [DGAT2, DGAT-2, diacylglycerol acyltransferase 2]

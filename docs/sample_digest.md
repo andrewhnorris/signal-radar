@@ -69,14 +69,6 @@
 
 ---
 
-## Went quiet
-
-*Discussed last quarter, absent this quarter. Often the first observable sign of a deprioritised program.*
-
-- **MDGL**: aro-pnpla3
-
----
-
 ## Coverage
 
 - **IVA** Q2 2026 — 0 passages (0 prepared / 0 Q&A), 0 analysts, 0 claims extracted
