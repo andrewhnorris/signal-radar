@@ -84,6 +84,33 @@ def test_13f_parses_and_ranks():
                for i in range(len(positions) - 1))
 
 
+# Real vendor failure mode, observed in the Inventiva FY2025 transcript: the
+# operator's turns are attributed to an analyst with a numeric suffix, and the
+# same name is reused for several different speakers.
+MISLABELLED = """
+**Anna Kripa, Analyst, Truist Securities**0: Good day, and thank you for standing by. Welcome to the call. At this time, all participants are in listen-only mode. To ask a question you will need to press star one and one.
+**Andrew Obenshain, Chief Executive Officer, Inventiva**: Thank you. Today we are updating the expected timing of our top-line readout to Q4 2026, reflecting disciplined sequencing of our clinical milestones.
+**Anna Kripa, Analyst, Truist Securities**0: Our next question comes from the line of Ritu Baral from TD Cowen. Please go ahead.
+**Anna Kripa, Analyst, Truist Securities**2: Good morning, I want to drill down on final powering and what effect size that powering assumes for the primary combined endpoint.
+"""
+
+
+def test_operator_detected_by_content_not_label():
+    from signal_radar.parse import parse_transcript
+    ps = parse_transcript(MISLABELLED)
+    # Both mislabelled operator turns must be dropped despite the analyst label.
+    assert len(ps) == 2, [p.text[:40] for p in ps]
+    assert not any("press star one" in p.text for p in ps)
+    assert not any("next question comes from" in p.text.lower() for p in ps)
+
+
+def test_numeric_speaker_suffix_stripped():
+    from signal_radar.parse import parse_transcript
+    ps = parse_transcript(MISLABELLED)
+    assert all(not p.speaker[-1].isdigit() for p in ps)
+    assert "Anna Kripa" in {p.speaker for p in ps}
+
+
 if __name__ == "__main__":
     # Runnable without pytest installed: `python tests/test_pipeline.py`
     import traceback

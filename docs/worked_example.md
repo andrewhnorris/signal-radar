@@ -83,6 +83,9 @@ Four failure modes for naive keyword matching, all observed in the sample:
 2. **Brand vs INN** — rivals say "resmetirom", the owner says "Rezdiffra". Both must match.
 3. **ASR errors** — one vendor renders "hepatologists and GIs" as **"Hepatitis C and GIs"**. A keyword rule files a liver-disease comment under infectious disease.
 4. **Vendor disagreement** — the same call, transcribed by two vendors, gives the CMO **two different names**. One renders the company as "Magical Pharmaceuticals".
+5. **Broken speaker separation** — in the Inventiva transcript the operator is labelled as an analyst with a numeric suffix, and one name is reused for several speakers. Left unhandled, the parser silently merges those lines into the previous speaker's turn, corrupting exactly the quote provenance the system depends on.
+
+And one that is not a terminology problem at all but breaks coverage the same way: **Inventiva reports semi-annually**, not quarterly. A scheduler expecting four calls a year per name under-covers every European holding and reports full coverage while doing it.
 
 Transcripts are dirty. Any design that assumes clean entity strings breaks on contact.
 

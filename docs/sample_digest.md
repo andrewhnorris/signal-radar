@@ -71,7 +71,7 @@
 
 ## Coverage
 
-- **IVA** Q2 2026 — 0 passages (0 prepared / 0 Q&A), 0 analysts, 0 claims extracted
+- **IVA** Q4 2025 — 0 passages (0 prepared / 0 Q&A), 0 analysts, 0 claims extracted
 - **MDGL** Q2 2026 — 0 passages (0 prepared / 0 Q&A), 0 analysts, 12 claims extracted
 - **NVO** Q2 2026 — 0 passages (0 prepared / 0 Q&A), 0 analysts, 0 claims extracted
 

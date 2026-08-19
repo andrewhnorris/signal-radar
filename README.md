@@ -74,7 +74,14 @@ The script ranks on what a filing can actually support — market value and weig
 
 On the sample filing the top ten names are ~87% of the disclosed book. That concentration is the argument for ranking on weight rather than raw value.
 
-**No IR-page scraping.** Verified across the watchlist: IR pages publish webcast players and PDF decks, not transcript text. Ten bespoke scrapers extracting text that is not there is the fastest way to spend the whole build on plumbing.
+**No IR-page scraping.** Verified across the watchlist: IR pages publish webcast players and PDF decks, not transcript text. Ten bespoke scrapers extracting text that is not there is the fastest way to spend the whole build on plumbing. `make fetch` pulls the four seed transcripts from an aggregator with a consistent speaker-tag format; the source is swappable and in production would be a licensed feed.
+
+**Not every company reports quarterly.** Assembling the manifest surfaced something a scheduler would get wrong: Inventiva is a French issuer and reports **semi-annually**. There is no "IVA Q2 2026" call — the most recent is FY2025 on 31 March 2026, and the next is 25 September 2026. Any coverage system that assumes four calls per name per year silently under-covers every European holding and then reports full coverage. Quarter labels in the manifest are the company's own reporting period, not a calendar quarter imposed on them.
+
+**Vendor diarization fails, and it fails quietly.** In the Inventiva transcript the operator's turns are attributed to an analyst with a numeric suffix (`**Name, Analyst, Firm**0:`), with the same name reused for several different speakers. Two consequences, both handled in `parse.py`:
+
+- The digits sit *outside* the bold markers, so the speaker regex failed to match and those lines were silently appended to the previous speaker's turn — misattributing operator boilerplate and analyst questions to whoever spoke last. That is a worse failure than a wrong label, because it corrupts the quote provenance the whole system rests on.
+- Operator turns are therefore detected on **content**, not on the speaker label. Filtering on role alone would have let dial-in instructions through as analyst commentary and attributed questions to the wrong bank.
 
 **Scope: biopharma depth over medtech breadth.** The brief covers medical technologies alongside biopharmaceuticals, and the watchlist carries PODD and ISRG. Every worked signal here is biopharma, and that was a deliberate call: with limited time, one indication cluster covered properly demonstrates more than two covered thinly.
 

@@ -19,10 +19,14 @@ from typing import Iterator, Literal
 Section = Literal["prepared", "qa"]
 
 # Vendor format: **Name, Title, Company**: text
-# Falls back to **Name**: and Name: for other vendors.
+# The optional trailing digits are a diarization artefact - investing.com emits
+# "**Name, Analyst, Firm**0:" when its speaker separation is uncertain, reusing
+# one name with different suffixes for different people. Without allowing for
+# them here the line fails to match at all and is silently appended to the
+# PREVIOUS speaker's turn, which is a far worse failure than a wrong label.
 _SPEAKER_PATTERNS = [
-    re.compile(r"^\*\*(?P<who>[^*]+?)\*\*\s*:\s*(?P<text>.*)$"),
-    re.compile(r"^(?P<who>[A-Z][A-Za-z.'\- ]{2,60}(?:,[^:]{0,80})?)\s*:\s{1}(?P<text>.+)$"),
+    re.compile(r"^\*\*(?P<who>[^*]+?)\*\*\d*\s*:\s*(?P<text>.*)$"),
+    re.compile(r"^(?P<who>[A-Z][A-Za-z.'\- ]{2,60}(?:,[^:]{0,80})?)\d*\s*:\s{1}(?P<text>.+)$"),
 ]
 
 # Markers that the call has moved from prepared remarks into Q&A. Checked in
@@ -63,8 +67,37 @@ class Passage:
         return self.role in {"CEO", "CMO", "CFO", "IR", "OTHER"} and self.role != "ANALYST"
 
 
+# Operator boilerplate, matched on CONTENT rather than on the speaker label.
+#
+# Necessary because vendor diarization is not reliable. In the Inventiva
+# FY2025 transcript the operator's turns are attributed to an analyst with a
+# numeric suffix - "Anna Andre Kripa, Analyst, Truist Securities0:" - and the
+# same analyst name is reused with different suffixes for several different
+# people. Filtering on the OPERATOR role alone would let dial-in instructions
+# through as analyst commentary, and would attribute other analysts' questions
+# to the wrong bank.
+_OPERATOR_CONTENT = re.compile(
+    r"press star|press \*|listen[- ]only mode|withdraw your question|"
+    r"conference is being recorded|hand the conference over|"
+    r"next question comes from|question for today comes from|"
+    r"concludes today'?s|you may now disconnect|please stand by",
+    re.I,
+)
+
+# Trailing digits on a speaker label are a diarization artefact, not part of
+# anyone's name.
+_NAME_SUFFIX = re.compile(r"\d+$")
+
+
+def _looks_like_operator(text: str) -> bool:
+    """True if a passage is operator boilerplate regardless of its label."""
+    head = text[:220]
+    return bool(_OPERATOR_CONTENT.search(head))
+
+
 def _classify_speaker(who: str) -> tuple[str, str, str]:
     """Split a '**Name, Title, Company**' blob into (name, role, affiliation)."""
+    who = _NAME_SUFFIX.sub("", who.strip())
     parts = [p.strip() for p in who.split(",")]
     name = parts[0]
     tail = ", ".join(parts[1:]).lower()
@@ -131,7 +164,10 @@ def parse_transcript(raw: str) -> list[Passage]:
     if cur and cur.text.strip():
         passages.append(cur)
 
-    return [p for p in passages if p.role != "OPERATOR" and len(p.text) > 40]
+    return [p for p in passages
+            if p.role != "OPERATOR"
+            and not _looks_like_operator(p.text)
+            and len(p.text) > 40]
 
 
 def chunk(passages: list[Passage], max_chars: int = 6000) -> Iterator[list[Passage]]:
@@ -161,6 +197,7 @@ def summarize(passages: list[Passage]) -> dict:
         "prepared": len(prepared),
         "qa": len(qa),
         "analysts": len({p.affiliation for p in qa if p.role == "ANALYST" and p.affiliation}),
+        "operator_turns_filtered": sum(1 for p in passages if _looks_like_operator(p.text)),
         "speakers": len({p.speaker for p in passages}),
         "chars": sum(len(p.text) for p in passages),
     }
