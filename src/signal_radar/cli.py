@@ -15,7 +15,7 @@ from pathlib import Path
 from . import fetch as fetch_mod
 from .config import load_materiality, load_portfolio
 from .diff import classify_novelty, dropped_topics
-from .extract import Claim, extract
+from .extract import Claim, extract, replay_stats
 from .parse import chunk, parse_transcript, summarize
 from .report import render_digest
 from .score import partition, score_all
@@ -25,9 +25,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # Known blind spots, surfaced in every digest. A monitoring system that cannot
 # say what it did not look at invites false confidence.
 COVERAGE_GAPS = [
-    "Novo Nordisk MASH commentary — Akero/efruxifermin now sits inside a "
-    "mega-cap call dominated by obesity and diabetes; low signal-to-noise, "
-    "needs section-targeted retrieval",
+    "Novo Nordisk MASH commentary is covered only at the headline level — "
+    "Akero/efruxifermin sits inside a mega-cap call dominated by obesity and "
+    "diabetes, so whole-call extraction is low signal-to-noise and section-"
+    "targeted retrieval is still needed to be confident nothing was missed",
     "Investor days and medical conferences (AASLD, EASL) — not earnings calls, "
     "different format, not yet ingested",
     "Non-US listings and private holdings — outside 13F, outside this watchlist",
@@ -74,11 +75,11 @@ def cmd_run(args: argparse.Namespace) -> int:
     portfolio = load_portfolio()
     cfg = load_materiality()
 
-    refs = fetch_mod.available()
-    if args.replay and not refs:
-        # Replay does not need transcript text on disk - cached claims already
-        # carry their passage metadata. Fall back to the manifest.
-        refs = fetch_mod.MANIFEST
+    # Replay reads cached claims, which already carry their passage metadata, so
+    # it always runs the full manifest. Keying off what happens to be on disk
+    # made the demo non-deterministic: importing a single transcript dropped the
+    # other three calls and with them the prior quarter every diff needs.
+    refs = fetch_mod.MANIFEST if args.replay else fetch_mod.available()
 
     if not refs:
         print("No transcripts available. Run `make fetch` first, "
@@ -114,6 +115,11 @@ def cmd_run(args: argparse.Namespace) -> int:
                   f"{stats['analysts']} analysts")
             if stats["qa"] == 0:
                 print("  ! WARNING: no Q&A section detected — check parse markers")
+        elif args.replay:
+            # No transcript to re-parse, so the fixture carries the parse counts.
+            # Without this the coverage table printed "0 passages" beside a
+            # non-zero claim count, which reads as a contradiction.
+            stats = replay_stats(ref.ticker, ref.quarter)
 
         claims: list[Claim] = []
         if args.replay:
@@ -130,6 +136,10 @@ def cmd_run(args: argparse.Namespace) -> int:
             if gone:
                 dropped[ref.ticker] = gone
 
+        # Score before persisting. The archive is the retune surface — a file
+        # where every score is 0.0 cannot be used to recover a missed signal,
+        # which is the whole argument for keeping below-threshold claims.
+        score_all(claims, portfolio, cfg)
         _save_claims(ref.ticker, ref.quarter, claims)
         if is_current:
             all_claims += claims
@@ -141,7 +151,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     scored = score_all(all_claims, portfolio, cfg)
     parts = partition(scored, cfg)
 
-    digest = render_digest(parts, portfolio, calls_processed, dict(dropped), COVERAGE_GAPS)
+    digest = render_digest(parts, calls_processed, dict(dropped), COVERAGE_GAPS)
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)

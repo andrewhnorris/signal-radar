@@ -152,6 +152,76 @@ def test_import_script_normalises_saved_html(tmp_path=None):
     assert "Risk Disclosure" not in text
 
 
+def test_persisted_claims_carry_scores():
+    """The archive is the retune surface. Claims were being written before
+    scoring, so every score on disk was 0.0 and the below-threshold archive the
+    README leans on for recall was unusable."""
+    import json, subprocess, tempfile, os
+    repo = Path(__file__).resolve().parents[1]
+    env = {**os.environ, "PYTHONPATH": str(repo / "src")}
+    with tempfile.TemporaryDirectory() as td:
+        r = subprocess.run(
+            [sys.executable, "-m", "signal_radar.cli", "run", "--replay",
+             "--out", str(Path(td) / "digest.md")],
+            cwd=repo, env=env, capture_output=True, text=True)
+        assert r.returncode == 0, r.stderr
+    saved = json.loads((repo / "out" / "claims" / "MDGL_Q22026.json").read_text())
+    assert saved, "no claims persisted"
+    assert all(c["score"] > 0 for c in saved), \
+        [c["score"] for c in saved if c["score"] <= 0]
+
+
+def test_speaker_normalisation_collapses_role_suffix():
+    """The prompt shows the model a "Name (ROLE, Affiliation)" header and it
+    echoes the header back roughly half the time, splitting one person across
+    two labels in live output."""
+    from signal_radar.extract import normalize_speaker
+    assert normalize_speaker("Bill Sibold (CEO, Madrigal Pharmaceuticals)") == "Bill Sibold"
+    assert normalize_speaker("Bill Sibold") == "Bill Sibold"
+    assert normalize_speaker("David Allegretti, CMO, Madrigal") == "David Allegretti"
+    assert normalize_speaker("  Mardi   Dier ") == "Mardi Dier"
+
+
+def test_delta_ignores_years_and_strips_date_padding():
+    """Years were being counted as figures, and the optional period prefix in
+    the date pattern made findall return a leading space - so deltas read
+    "figures changed: 2025" and "timing moved:  2026 ->  2025"."""
+    from signal_radar.diff import _figures, _dates
+    assert _figures("net sales were $364.3 million in 2026, up 71%") == {"364.3", "71"}
+    assert _dates("tracking to 2027") == {"2027"}
+    assert _dates("readout in 1H 2027") == {"1H 2027"}
+    assert all(not d.startswith(" ") for d in _dates("quarter 2026 net"))
+
+
+def test_reconstructed_fixtures_do_not_claim_a_passage_citation():
+    """A passage index promises the quote was checked against a parsed span.
+    Reconstructed fixtures have no span, so they must not print one."""
+    from signal_radar.extract import Claim
+    from signal_radar.report import _cite
+    def mk(prov):
+        return Claim(claim="c", quote="q", passage_idx=7, speaker="S",
+                     signal_type="clinical_readout", affected_holdings=["MDGL"],
+                     linkage="named_asset", materiality=0.5, reasoning="r",
+                     provenance=prov)
+    assert _cite(mk("verbatim")) == "[passage 7]"
+    assert "passage" not in _cite(mk("reconstructed"))
+    assert "reconstructed" in _cite(mk("reconstructed"))
+
+
+def test_replay_uses_full_manifest_regardless_of_local_transcripts():
+    """Replay reads cached claims, so it must not be gated on what happens to
+    be on disk - one imported transcript used to drop the other three calls and
+    with them the prior quarter every diff needs."""
+    from signal_radar import fetch as fetch_mod
+    from signal_radar.extract import replay_stats
+    assert len(fetch_mod.MANIFEST) == 4
+    covered = {(r.ticker, r.quarter) for r in fetch_mod.MANIFEST}
+    assert ("NVO", "Q2 2026") in covered and ("IVA", "Q4 2025") in covered
+    # MDGL Q2 carries real parse counts so the coverage table is populated
+    # even when no transcript is cached locally.
+    assert replay_stats("MDGL", "Q2 2026")["passages"] == 47
+
+
 if __name__ == "__main__":
     # Runnable without pytest installed: `python tests/test_pipeline.py`
     import traceback

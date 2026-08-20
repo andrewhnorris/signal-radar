@@ -1,6 +1,9 @@
 # RTW portfolio watchlist.
 #
-# "Important" is defined here as a composite, not position size alone:
+# "Important" is a hand-assigned tier. The four factors below are the stated
+# rationale for that judgement, not a computed score - there is no weighting
+# formula hiding behind the tier, and an analyst re-tiering a name only has to
+# argue with these four things:
 #   1. Dollar value of the position (13F)
 #   2. Weight as % of the disclosed equity book (concentration = conviction)
 #   3. Ownership as % of shares outstanding (a 9% stake is a different

@@ -1,0 +1,47 @@
+{
+  "_source": "Novo Nordisk (NVO) Q2 2026 earnings call. The haystack case: MASH commentary inside a mega-cap call dominated by obesity and diabetes, post-Akero acquisition (announced 9 October 2025, up to $5.2B).",
+  "_reconstructed": true,
+  "_caveat": "DEMO FIXTURE. Assembled from Novo Nordisk's published MASH/efruxifermin disclosures rather than a parsed transcript, so `quote` holds the reported statement, not a verified verbatim span, and `passage_idx` is indicative only. Claims carry provenance='reconstructed' and the digest cites them as such. NOT part of the eval set. The low claim count is the point, not a defect: two MASH claims out of an hour of obesity and diabetes commentary is the signal-to-noise problem this fixture exists to demonstrate.",
+  "claims": [
+    {
+      "claim": "Novo Nordisk confirmed it is advancing efruxifermin, the FGF21 analogue acquired with Akero, in Phase 3 MASH including compensated cirrhosis.",
+      "quote": "efruxifermin continues in Phase 3 development in MASH, including compensated cirrhosis",
+      "passage_idx": 22,
+      "speaker": "Martin Holst Lange",
+      "signal_type": "clinical_readout",
+      "affected_holdings": ["MDGL"],
+      "linkage": "shared_mechanism",
+      "entities": {
+        "drugs": ["efruxifermin"],
+        "mechanisms": ["FGF21"],
+        "indications": ["MASH", "MASH F4c"],
+        "trials": [],
+        "companies": ["Novo Nordisk", "Akero Therapeutics"]
+      },
+      "materiality": 0.75,
+      "reasoning": "The closest mechanism rival to Rezdiffra, now funded and commercialised by a mega-cap rather than a single-asset biotech. Directly contests the F4c opportunity Madrigal is guiding to in 2027. Reaches the portfolio on mechanism alone — this call never says 'Madrigal'.",
+      "transcription_note": null,
+      "section": "prepared"
+    },
+    {
+      "claim": "Management framed semaglutide's MASH indication as a broad primary-care opportunity rather than a specialist liver-disease launch.",
+      "quote": "we see MASH as a natural extension of our cardiometabolic franchise in primary care",
+      "passage_idx": 31,
+      "speaker": "Lars Fruergaard Jorgensen",
+      "signal_type": "competitive_positioning",
+      "affected_holdings": ["MDGL"],
+      "linkage": "shared_indication",
+      "entities": {
+        "drugs": ["semaglutide"],
+        "mechanisms": ["GLP-1"],
+        "indications": ["MASH"],
+        "trials": [],
+        "companies": ["Novo Nordisk"]
+      },
+      "materiality": 0.65,
+      "reasoning": "Rezdiffra's prescriber base is concentrated in hepatology and gastroenterology. A primary-care push by a GLP-1 incumbent attacks the channel Madrigal is still nine months into opening in endocrinology.",
+      "transcription_note": null,
+      "section": "qa"
+    }
+  ]
+}

@@ -64,10 +64,6 @@ class Passage:
     def to_dict(self) -> dict:
         return asdict(self)
 
-    @property
-    def is_management(self) -> bool:
-        return self.role in {"CEO", "CMO", "CFO", "IR", "OTHER"} and self.role != "ANALYST"
-
 
 # Operator boilerplate, matched on CONTENT rather than on the speaker label.
 #
@@ -199,7 +195,6 @@ def summarize(passages: list[Passage]) -> dict:
         "prepared": len(prepared),
         "qa": len(qa),
         "analysts": len({p.affiliation for p in qa if p.role == "ANALYST" and p.affiliation}),
-        "operator_turns_filtered": sum(1 for p in passages if _looks_like_operator(p.text)),
         "speakers": len({p.speaker for p in passages}),
         "chars": sum(len(p.text) for p in passages),
     }

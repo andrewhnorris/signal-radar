@@ -13,7 +13,6 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import date
 
-from .config import Portfolio
 from .extract import Claim
 
 _TYPE_LABEL = {
@@ -23,6 +22,18 @@ _TYPE_LABEL = {
     "commercial_trajectory": "Commercial",
 }
 _NOVELTY_LABEL = {"new": "NEW", "changed": "CHANGED", "repeated": "repeat", "unknown": ""}
+
+
+def _cite(c: Claim) -> str:
+    """Citation, honest about what it can and cannot prove.
+
+    A passage index is a promise that the quote was checked against a parsed
+    span. Reconstructed fixtures have no such span, so they say so rather than
+    printing an index that clicks through to nothing.
+    """
+    if c.provenance == "reconstructed":
+        return "[reconstructed from public disclosure — not a parsed transcript]"
+    return f"[passage {c.passage_idx}]"
 
 
 def _render_claim(c: Claim, n: int) -> str:
@@ -38,7 +49,7 @@ def _render_claim(c: Claim, n: int) -> str:
         "",
         f"> {c.quote}",
         f"> — {c.speaker}, {c.source_company} {c.quarter}, {c.section.upper()} "
-        f"[passage {c.passage_idx}]",
+        f"{_cite(c)}",
         "",
         f"**Why it matters:** {c.reasoning}",
     ]
@@ -50,7 +61,7 @@ def _render_claim(c: Claim, n: int) -> str:
     return "\n".join(lines)
 
 
-def render_digest(partitioned: dict[str, list[Claim]], portfolio: Portfolio,
+def render_digest(partitioned: dict[str, list[Claim]],
                   calls_processed: list[dict], dropped: dict[str, list[str]],
                   coverage_gaps: list[str] | None = None) -> str:
     alerts, watch, archive = (partitioned["alerts"], partitioned["watch"],
@@ -78,12 +89,18 @@ def render_digest(partitioned: dict[str, list[Claim]], portfolio: Portfolio,
         for c in alerts:
             for h in c.affected_holdings:
                 by_holding[h].append(c)
+        # Grouped by the holding at risk, because an analyst reads by coverage,
+        # not by score. The group header has to be rendered — without it the
+        # numbering looks mis-sorted, since a 1.16 under one holding precedes a
+        # 1.94 under the next.
         seen: set[int] = set()
         n = 0
         for holding in sorted(by_holding, key=lambda h: -max(c.score for c in by_holding[h])):
-            for c in by_holding[holding]:
-                if id(c) in seen:
-                    continue
+            fresh = [c for c in by_holding[holding] if id(c) not in seen]
+            if not fresh:
+                continue
+            out += [f"### {holding}", ""]
+            for c in fresh:
                 seen.add(id(c))
                 n += 1
                 out.append(_render_claim(c, n))
@@ -98,7 +115,8 @@ def render_digest(partitioned: dict[str, list[Claim]], portfolio: Portfolio,
             out.append(
                 f"- **{holdings}** · {_TYPE_LABEL.get(c.signal_type, c.signal_type)} "
                 f"(`{c.score}`) — {c.claim} "
-                f"<sub>{c.speaker}, {c.section.upper()}, passage {c.passage_idx}</sub>"
+                f"<sub>{c.speaker}, {c.section.upper()}, "
+                f"{'reconstructed' if c.provenance == 'reconstructed' else f'passage {c.passage_idx}'}</sub>"
             )
         out.append("")
 
@@ -116,11 +134,17 @@ def render_digest(partitioned: dict[str, list[Claim]], portfolio: Portfolio,
     out += ["---", "", "## Coverage", ""]
     for call in calls_processed:
         s = call.get("stats", {})
+        # Distinguish "we parsed the call and found nothing" from "we never had
+        # the transcript". Defaulting both to 0 hid a coverage hole as a result.
+        if s.get("passages"):
+            shape = (f"{s['passages']} passages "
+                     f"({s.get('prepared', 0)} prepared / {s.get('qa', 0)} Q&A), "
+                     f"{s.get('analysts', 0)} analysts")
+        else:
+            shape = "transcript not ingested"
         out.append(
             f"- **{call['ticker']}** {call['quarter']} — "
-            f"{s.get('passages', 0)} passages "
-            f"({s.get('prepared', 0)} prepared / {s.get('qa', 0)} Q&A), "
-            f"{s.get('analysts', 0)} analysts, {call.get('claims', 0)} claims extracted"
+            f"{shape}, {call.get('claims', 0)} claims extracted"
         )
     if coverage_gaps:
         out += ["", "**Not ingested this window** — known blind spots:", ""]

@@ -73,11 +73,13 @@ MASH commentary that used to arrive on a focused 40-minute biotech call now arri
 
 **This is why linkage is evaluated on mechanism and indication, not company name.**
 
+In the shipped demo the Novo Nordisk call surfaces two MASH claims and the efruxifermin one reaches MDGL on `shared_mechanism` alone — the call never says "Madrigal". It scores 1.035, just under the 1.10 alert bar, so it lands in Context rather than interrupting anyone. That is the right outcome for a single mention with no prior quarter to compare against, and it is the difference between finding something and shouting about it.
+
 ---
 
 ## Slide 7 — Terminology, from the actual transcripts
 
-Four failure modes for naive keyword matching, all observed in the sample:
+Five failure modes for naive keyword matching, all observed in the sample:
 
 1. **MASH and NASH are the same disease** — used interchangeably within a single call, sometimes in adjacent sentences.
 2. **Brand vs INN** — rivals say "resmetirom", the owner says "Rezdiffra". Both must match.
@@ -96,6 +98,8 @@ Transcripts are dirty. Any design that assumes clean entity strings breaks on co
 ```
 Needs an analyst
 
+### IVA
+
 1. IVA, MDGL — Madrigal cited research claiming 80% of prescribers
    would not use lanifibranor because of weight gain.
 
@@ -109,15 +113,18 @@ Needs an analyst
    weeks before its Phase 3 topline...
 ```
 
+Grouped by the holding at risk, because an analyst reads by coverage, not by score.
+
 Speaker, section, verbatim quote, passage index. **An analyst can verify it in one click or ignore it in five seconds.** Both outcomes are acceptable; an unverifiable summary is not.
 
 ---
 
 ## Slide 9 — Honest limitations
 
-- **The Q1 2026 fixture is reconstructed** from published summaries, not a parsed transcript. Adequate to exercise the quarter-over-quarter diff; not part of the eval set.
+- **Only one call here is a parsed transcript.** Madrigal Q2 2026. The MDGL Q1 baseline and the IVA and NVO calls are reconstructed from published disclosure, so they exercise the diff and cross-company linkage but carry no verified verbatim span. The digest labels them `reconstructed` rather than citing a passage index, and they are excluded from the eval set.
 - **Eval is 20 hand-labelled rows on one company.** It measures whether ranking puts the right things on top. It does not measure whether extraction found everything — that is the recall question, and it is unanswered.
-- **One false positive, found and fixed**: Q1 called the Arrowhead asset `ARO-PNPLA3`; Q2 calls it `MGL-0795` after in-licensing, and the "went quiet" detector reported a renamed asset as a dropped programme. `config/aliases.yaml` now resolves programme identity before comparison. The map is hand-maintained and will be incomplete on names outside the sample.
+- **Two false positives remain at the configured threshold**, both defensible-but-below-bar: a repeated timeline guide and a business-development payment. `run_eval.py` names them with the labelling rationale.
+- **A third was found and fixed during the build**: Q1 called the Arrowhead asset `ARO-PNPLA3`; Q2 calls it `MGL-0795` after in-licensing, and the "went quiet" detector reported a renamed asset as a dropped programme. `config/aliases.yaml` now resolves programme identity before comparison. The map is hand-maintained and will be incomplete on names outside the sample.
 - **No causal claim.** Price moves after a flagged signal are confounded by everything else in the quarter. This deck asserts the signals are material on their merits, not that they were tradeable.
 
 ---

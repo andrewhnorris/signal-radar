@@ -1,0 +1,47 @@
+{
+  "_source": "Inventiva SA (IVA) FY2025 results call, 31 March 2026. Inventiva is a French issuer and reports semi-annually — there is no 'Q1' or 'Q3' call, and no 'IVA Q2 2026'. The quarter label is the company's own reporting period.",
+  "_reconstructed": true,
+  "_caveat": "DEMO FIXTURE. Assembled from Inventiva's published NATiV3 disclosures and management commentary rather than a parsed transcript, so `quote` holds the reported statement, not a verified verbatim span, and `passage_idx` is indicative only. Claims carry provenance='reconstructed' and the digest cites them as such. NOT part of the eval set. Replace by running `make fetch && make run` against a licensed transcript.",
+  "claims": [
+    {
+      "claim": "Inventiva guided NATiV3 Phase 3 topline in MASH to the second half of 2026, with management pointing to the later part of the window.",
+      "quote": "topline results from NATiV3 are expected in the second half of 2026",
+      "passage_idx": 5,
+      "speaker": "Frederic Cren",
+      "signal_type": "timeline_change",
+      "affected_holdings": ["IVA", "MDGL"],
+      "linkage": "named_asset",
+      "entities": {
+        "drugs": ["lanifibranor"],
+        "mechanisms": ["pan-PPAR"],
+        "indications": ["MASH"],
+        "trials": ["NATiV3"],
+        "companies": ["Inventiva"]
+      },
+      "materiality": 0.8,
+      "reasoning": "NATiV3 topline is the binary event for IVA and the single largest near-term competitive risk to Rezdiffra's position in F2-F3 MASH. The readout window sets the clock on both holdings.",
+      "transcription_note": null,
+      "section": "prepared"
+    },
+    {
+      "claim": "Management addressed lanifibranor's weight-gain profile directly, describing mitigation through combination with an SGLT2 inhibitor.",
+      "quote": "weight gain is manageable and we have studied combination with SGLT2 inhibitors",
+      "passage_idx": 14,
+      "speaker": "Pierre Broqua",
+      "signal_type": "competitive_positioning",
+      "affected_holdings": ["IVA", "MDGL"],
+      "linkage": "named_asset",
+      "entities": {
+        "drugs": ["lanifibranor"],
+        "mechanisms": ["pan-PPAR", "SGLT2"],
+        "indications": ["MASH"],
+        "trials": [],
+        "companies": ["Inventiva"]
+      },
+      "materiality": 0.7,
+      "reasoning": "IVA pre-empting the tolerability attack Madrigal later ran on its Q2 call. Confirms both sides see weight gain as the commercial battleground, independent of the histology result.",
+      "transcription_note": null,
+      "section": "qa"
+    }
+  ]
+}

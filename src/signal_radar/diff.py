@@ -34,8 +34,25 @@ HEDGE_MARKERS = [
     "we'll provide an update", "will provide more", "some variability",
 ]
 
+# A bare 20xx is a date, not a figure. Without the year guard, "net sales were
+# $364M in 2026" reported the year as a figure that had changed, and the same
+# token then appeared again under timing.
+_YEAR = re.compile(r"^20\d{2}$")
 _NUM = re.compile(r"\b\d[\d,\.]*%?\b")
-_DATE = re.compile(r"\b(?:1H|2H|H1|H2|Q[1-4]|early|mid|late|first half|second half)?\s*20\d{2}\b", re.I)
+# The period prefix is optional, so an un-anchored pattern matched the space
+# before the year and findall returned " 2026" — hence "timing moved:  2026".
+_DATE = re.compile(
+    r"\b(?:(?:1H|2H|H1|H2|Q[1-4]|early|mid|late|first half|second half)\s+)?20\d{2}\b",
+    re.I,
+)
+
+
+def _figures(text: str) -> set[str]:
+    return {n for n in _NUM.findall(text) if not _YEAR.match(n)}
+
+
+def _dates(text: str) -> set[str]:
+    return {" ".join(d.split()) for d in _DATE.findall(text)}
 
 
 def _norm(text: str) -> str:
@@ -155,11 +172,11 @@ def classify_novelty(current: list[Claim], prior: list[Claim],
 
         deltas: list[str] = []
 
-        new_nums = set(_NUM.findall(c.quote)) - set(_NUM.findall(best.quote))
+        new_nums = _figures(c.quote) - _figures(best.quote)
         if new_nums:
             deltas.append(f"figures changed: {', '.join(sorted(new_nums)[:4])}")
 
-        cur_dates, prior_dates = set(_DATE.findall(c.quote)), set(_DATE.findall(best.quote))
+        cur_dates, prior_dates = _dates(c.quote), _dates(best.quote)
         if cur_dates and prior_dates and cur_dates != prior_dates:
             deltas.append(f"timing moved: {'/'.join(sorted(prior_dates))} -> {'/'.join(sorted(cur_dates))}")
 

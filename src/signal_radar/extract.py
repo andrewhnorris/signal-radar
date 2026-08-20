@@ -15,7 +15,7 @@ import os
 import re
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
-from typing import Any
+
 
 from .config import Portfolio
 from .parse import Passage
@@ -52,9 +52,42 @@ class Claim:
     novelty: str = "unknown"
     delta: str = ""      # human-readable explanation of what changed vs prior quarter
     score: float = 0.0
+    # "verbatim"      - quote was checked against a parsed transcript span
+    # "reconstructed" - assembled from published disclosure, no transcript parsed
+    # Rendered differently, because a passage index a reader cannot click back to
+    # is exactly the unverifiable summary this system refuses to produce.
+    provenance: str = "verbatim"
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+
+def normalize_speaker(name: str) -> str:
+    """Collapse the variants a model returns for one person.
+
+    Live output carried the same person as both "Bill Sibold" and
+    "Bill Sibold (CEO, Madrigal Pharmaceuticals)", which silently splits any
+    speaker-level grouping and undercuts the quote provenance the digest rests
+    on. The title belongs to the role field, not the identity.
+    """
+    name = re.sub(r"\s*[(\[].*?[)\]]\s*$", "", (name or "").strip())
+    name = re.sub(r"\s*[,—-]\s*(?:CEO|CFO|CMO|COO|President|Chair(?:man)?|"
+                  r"Analyst|Operator)\b.*$", "", name, flags=re.I)
+    return re.sub(r"\s+", " ", name).strip()
+
+
+def replay_stats(ticker: str, quarter: str) -> dict:
+    """Parse statistics cached alongside a replay fixture.
+
+    In replay there is no transcript on disk to re-parse, so the coverage table
+    has nothing to report unless the fixture carries it. Without this the digest
+    printed "0 passages" next to a non-zero claim count.
+    """
+    path = REPLAY_DIR / f"{ticker.upper()}_{quarter.replace(' ', '')}.json"
+    if not path.exists():
+        return {}
+    payload = json.loads(path.read_text())
+    return payload.get("_stats", {}) if isinstance(payload, dict) else {}
 
 
 def _portfolio_block(portfolio: Portfolio) -> str:
@@ -134,7 +167,11 @@ def _validate(raw: list[dict], passages: list[Passage]) -> list[Claim]:
                 claim=item.get("claim", "").strip(),
                 quote=quote,
                 passage_idx=idx,
-                speaker=item.get("speaker") or src.speaker,
+                # The parser's name is authoritative. The prompt shows the model
+                # a "Name (ROLE, Affiliation)" header, and it echoes that header
+                # back about half the time — so trusting the model here split one
+                # person across two labels in live output.
+                speaker=src.speaker,
                 signal_type=stype,
                 affected_holdings=holdings,
                 linkage=linkage,
@@ -176,12 +213,17 @@ def extract(passages: list[Passage], portfolio: Portfolio, company: str,
             return []
         payload = json.loads(path.read_text())
         raw = payload["claims"] if isinstance(payload, dict) else payload
+        reconstructed = (isinstance(payload, dict)
+                         and payload.get("_reconstructed", False))
         # Cached claims were validated when they were first produced, and there
         # are no passages on disk in replay mode to re-check them against.
         claims = [Claim(**{k: v for k, v in item.items() if k in Claim.__annotations__})
                   for item in raw]
         for c in claims:
             c.source_ticker, c.source_company, c.quarter = ticker.upper(), company, quarter
+            c.speaker = normalize_speaker(c.speaker)
+            if reconstructed:
+                c.provenance = "reconstructed"
         return claims
     else:
         prompt = render_prompt(passages, portfolio, company, ticker, quarter)
