@@ -36,7 +36,9 @@ _QA_MARKERS = [
     re.compile(r"(?:let'?s |we'?ll )?(?:move|turn) (?:in)?to the q\s*&\s*a", re.I),
     re.compile(r"(?:we will|we'll) now (?:begin|conduct|open).{0,40}question[- ]and[- ]answer", re.I),
     re.compile(r"^\s*question[- ]and[- ]answer session\s*$", re.I),
-    re.compile(r"first question comes from", re.I),
+    # "first" alone is not enough: some operators open the Q&A with "our next
+    # question comes from", and the section would never flip.
+    re.compile(r"(?:first|next) question (?:for today )?comes from", re.I),
 ]
 
 _TITLE_HINTS = {

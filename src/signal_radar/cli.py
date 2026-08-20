@@ -156,10 +156,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 def cmd_fetch(args: argparse.Namespace) -> int:
     print("Fetching transcripts into data/transcripts/ (gitignored)...")
     got = fetch_mod.fetch_all(force=args.force)
-    print(f"\n{len(got)}/{len(fetch_mod.MANIFEST)} available")
-    if not got:
-        print("\nNo URLs in the manifest. Populate MANIFEST in "
-              "src/signal_radar/fetch.py, or use `make demo`.")
+    print(f"\n{len(got)}/{len(fetch_mod.MANIFEST)} transcripts available locally")
     return 0
 
 

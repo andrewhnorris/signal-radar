@@ -15,9 +15,12 @@ No API key. No network. Opens `out/digest.md` in about two seconds.
 
 ```bash
 make eval     # precision/recall against a hand-labelled set, plus a threshold sweep
-make fetch    # populate data/transcripts/ (see "Data & licensing")
-make run      # live extraction; needs ANTHROPIC_API_KEY
+make test     # 11 tests, runs without pytest installed
+make seed     # parse a 13F information table into a ranked portfolio seed
+make run      # live extraction; needs ANTHROPIC_API_KEY and cached transcripts
 ```
+
+To run live extraction you need transcript text, which this repo does not ship. See **Acquiring transcripts** below.
 
 A pre-generated digest is committed at [`docs/sample_digest.md`](docs/sample_digest.md) — readable without running anything.
 
@@ -74,7 +77,25 @@ The script ranks on what a filing can actually support — market value and weig
 
 On the sample filing the top ten names are ~87% of the disclosed book. That concentration is the argument for ranking on weight rather than raw value.
 
-**No IR-page scraping.** Verified across the watchlist: IR pages publish webcast players and PDF decks, not transcript text. Ten bespoke scrapers extracting text that is not there is the fastest way to spend the whole build on plumbing. `make fetch` pulls the four seed transcripts from an aggregator with a consistent speaker-tag format; the source is swappable and in production would be a licensed feed.
+**No IR-page scraping.** Verified across the watchlist: IR pages publish webcast players and PDF decks, not transcript text. Ten bespoke scrapers extracting text that is not there is the fastest way to spend the whole build on plumbing.
+
+### Acquiring transcripts
+
+The aggregator used to identify the seed transcripts returns **HTTP 403** to automated requests, and its terms prohibit programmatic reproduction of site content.
+
+I did not work around it. Spoofing a user agent to defeat bot detection is not a data pipeline a fund should depend on, and the licensing question does not disappear just because the request starts succeeding. The manifest URLs in `fetch.py` are therefore **provenance** — they record exactly which document produced each cached extraction and stay checkable by hand — not a supported automated path.
+
+Three supported paths, in order of preference:
+
+| | Path | Notes |
+|---|---|---|
+| 1 | **Licensed API** — set `TRANSCRIPT_API_BASE` and `TRANSCRIPT_API_KEY` | What production should use. Terms permit storage. |
+| 2 | **Manual import** — `python scripts/import_transcript.py saved.html --ticker MDGL --quarter "Q2 2026"` | Save the page in a browser; the script normalises vendor speaker formats into the parser's form. Adequate for a prototype. |
+| 3 | **SEC EDGAR 8-K Ex-99** | Public domain, automated access permitted with an identifying UA. Prepared remarks only — never the Q&A, which is where most of this system's signal comes from. |
+
+That last caveat is the whole argument for paying for a feed: the free, unambiguously licensed source is missing the half of the call that matters.
+
+`make demo` needs none of this — it runs on cached extraction output.
 
 **Not every company reports quarterly.** Assembling the manifest surfaced something a scheduler would get wrong: Inventiva is a French issuer and reports **semi-annually**. There is no "IVA Q2 2026" call — the most recent is FY2025 on 31 March 2026, and the next is 25 September 2026. Any coverage system that assumes four calls per name per year silently under-covers every European holding and then reports full coverage. Quarter labels in the manifest are the company's own reporting period, not a calendar quarter imposed on them.
 
@@ -136,6 +157,7 @@ config/materiality.yaml    scoring weights, thresholds, signal taxonomy
 config/aliases.yaml        asset/indication/mechanism identity resolution
 scripts/ingest_13f.py      EDGAR 13F -> ranked portfolio seed
 prompts/extract_claims.md  the extraction prompt — where domain judgment lives
+scripts/import_transcript.py  normalise a saved transcript into the cache
 src/signal_radar/
   parse.py                 speaker tags, prepared/Q&A split, chunking
   extract.py               LLM -> validated structured claims; replay mode

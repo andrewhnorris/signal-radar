@@ -12,9 +12,36 @@ format, and treat the source as swappable. In production this is a paid feed
 
 Transcript text is NOT committed to this repo - it is third-party licensed
 content. Fetched files land in data/transcripts/, which is gitignored.
+
+ACQUISITION STATUS, verified 19 Aug 2026
+----------------------------------------
+The aggregator used to identify the seed transcripts returns HTTP 403 to
+automated requests, and its terms prohibit programmatic reproduction of site
+content. We do not work around that: spoofing a user agent to defeat bot
+detection is not a data pipeline a fund should depend on, and the licensing
+question does not go away just because the request succeeds.
+
+So the manifest URLs below are PROVENANCE - they record exactly which document
+produced each cached extraction, and remain checkable by hand. They are not a
+supported automated path.
+
+Supported paths, in order of preference:
+
+  1. Licensed API. Set TRANSCRIPT_API_BASE and TRANSCRIPT_API_KEY. Several
+     vendors (Financial Modeling Prep, API Ninjas, Quartr, AlphaSense) sell
+     earnings-transcript endpoints whose terms permit storage. This is what
+     production should use.
+  2. Manual import. Save the page in a browser, then
+     `python scripts/import_transcript.py saved.html --ticker MDGL
+      --quarter "Q2 2026"`. Adequate for a prototype and fully above board.
+  3. SEC EDGAR. Some issuers file prepared remarks as an 8-K Ex-99. Public
+     domain, and EDGAR permits automated access with an identifying UA. Covers
+     prepared remarks only - never the Q&A, which is where most of the signal
+     in this system comes from.
 """
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,7 +49,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TRANSCRIPT_DIR = REPO_ROOT / "data" / "transcripts"
 
-UA = "Mozilla/5.0 (compatible; signal-radar research prototype)"
+UA = "signal-radar research prototype (contact: analyst@example.com)"
+
+# Optional licensed-API provider. Configure both to enable `make fetch`.
+API_BASE = os.environ.get("TRANSCRIPT_API_BASE", "")
+API_KEY = os.environ.get("TRANSCRIPT_API_KEY", "")
 
 
 @dataclass
@@ -93,35 +124,62 @@ def _clean(html: str) -> str:
 
 
 def fetch_one(ref: TranscriptRef, force: bool = False) -> Path | None:
-    """Fetch and cache one transcript. Returns None if unavailable."""
+    """Fetch one transcript via a configured licensed API. None if unavailable.
+
+    Deliberately does NOT fall back to scraping the manifest URL. A silent
+    fallback would make the licensing posture depend on whether an env var
+    happened to be set, which is exactly the kind of thing nobody notices
+    until it matters.
+    """
     if ref.path.exists() and not force:
         return ref.path
-    if not ref.url:
+    if not (API_BASE and API_KEY):
         return None
 
     import requests
 
     TRANSCRIPT_DIR.mkdir(parents=True, exist_ok=True)
     try:
-        resp = requests.get(ref.url, headers={"User-Agent": UA}, timeout=30)
+        resp = requests.get(
+            API_BASE,
+            params={"symbol": ref.ticker, "period": ref.quarter, "apikey": API_KEY},
+            headers={"User-Agent": UA},
+            timeout=30,
+        )
         resp.raise_for_status()
     except Exception as exc:  # noqa: BLE001 - surface, do not crash the batch
         print(f"  ! {ref.ticker} {ref.quarter}: {exc}")
         return None
 
-    ref.path.write_text(_clean(resp.text))
+    body = resp.text
+    ref.path.write_text(_clean(body) if "<" in body[:200] else body)
     return ref.path
 
 
 def fetch_all(force: bool = False) -> list[TranscriptRef]:
     """Fetch everything in the manifest. Missing entries are reported, not fatal."""
+    if not (API_BASE and API_KEY):
+        print("  No licensed transcript API configured "
+              "(set TRANSCRIPT_API_BASE and TRANSCRIPT_API_KEY).\n")
+        cached = [r for r in MANIFEST if r.path.exists()]
+        for ref in MANIFEST:
+            mark = "+" if ref.path.exists() else "-"
+            state = "cached" if ref.path.exists() else "not available"
+            print(f"  {mark} {ref.ticker} {ref.quarter}: {state}")
+        print("\n  To import a transcript you already have:")
+        print("    python scripts/import_transcript.py saved.html "
+              "--ticker MDGL --quarter \"Q2 2026\"")
+        print("  Manifest URLs are recorded in this file as provenance.")
+        print("  Or run `make demo` - cached extraction, no transcripts needed.")
+        return cached
+
     got = []
     for ref in MANIFEST:
         if fetch_one(ref, force=force):
             got.append(ref)
             print(f"  + {ref.ticker} {ref.quarter}")
         else:
-            print(f"  - {ref.ticker} {ref.quarter}: no URL in manifest or fetch failed")
+            print(f"  - {ref.ticker} {ref.quarter}: fetch failed")
     return got
 
 

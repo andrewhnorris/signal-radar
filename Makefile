@@ -1,4 +1,4 @@
-.PHONY: demo run test eval seed fetch clean
+.PHONY: demo run test eval seed import fetch clean
 
 # Zero-setup demo: runs the full pipeline on cached model output. No API key needed.
 demo:
@@ -8,6 +8,10 @@ demo:
 # Live run: requires ANTHROPIC_API_KEY and fetched transcripts.
 run:
 	PYTHONPATH=src python -m signal_radar.cli run --out out/digest.md
+
+import:
+	@echo "Usage: python scripts/import_transcript.py <saved.html> --ticker MDGL --quarter \"Q2 2026\""
+	@python scripts/import_transcript.py --list
 
 fetch:
 	PYTHONPATH=src python -m signal_radar.cli fetch

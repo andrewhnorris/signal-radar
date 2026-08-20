@@ -1,5 +1,5 @@
 # Competitor Call Digest
-*Generated 2026-08-19 · 3 call(s) · 5 alerts, 6 watch, 1 archived*
+*Generated 2026-08-20 · 3 call(s) · 5 alerts, 6 watch, 1 archived*
 
 ---
 

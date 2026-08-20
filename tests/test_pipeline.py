@@ -111,6 +111,47 @@ def test_numeric_speaker_suffix_stripped():
     assert "Anna Kripa" in {p.speaker for p in ps}
 
 
+def test_qa_flips_on_next_question_not_only_first():
+    """Some operators open Q&A with 'our next question comes from'."""
+    from signal_radar.parse import parse_transcript
+    doc = (
+        "**Jane Doe, Chief Executive Officer, Example Bio**: Net sales grew 71% "
+        "and the Phase 3 remains on track for a 2027 readout this year.\n"
+        "**Operator**: Our next question comes from the line of Sam Analyst "
+        "from Big Bank. Please go ahead.\n"
+        "**Sam Analyst, Analyst, Big Bank**: Can you narrow the readout timing, "
+        "or is 2027 still the guide you are comfortable with today?\n"
+    )
+    ps = parse_transcript(doc)
+    assert [p.section for p in ps] == ["prepared", "qa"], [(p.speaker, p.section) for p in ps]
+
+
+def test_import_script_normalises_saved_html(tmp_path=None):
+    """The manual-import path must produce text the parser can actually read."""
+    import sys
+    from pathlib import Path as _P
+    root = _P(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "scripts"))
+    from import_transcript import normalise_speakers, strip_html, trim_to_body
+    from signal_radar.parse import parse_transcript
+
+    html = (
+        "<html><body><nav>Markets</nav>"
+        "<h2>Full transcript - Example Bio (EXBI) Q2 2026:</h2>"
+        "<p><strong>Operator</strong>: Good day. Please stand by. All "
+        "participants are in listen-only mode.</p>"
+        "<p><strong>Jane Doe, Chief Executive Officer, Example Bio</strong>: "
+        "Net sales were $364 million, up 71% year over year in the quarter.</p>"
+        "<p>Risk Disclosure: Trading involves high risks.</p></body></html>"
+    )
+    text, hits = normalise_speakers(trim_to_body(strip_html(html)))
+    assert hits >= 2, text
+    ps = parse_transcript(text)
+    # Operator dropped, CEO kept with the right role.
+    assert len(ps) == 1 and ps[0].role == "CEO", [(p.speaker, p.role) for p in ps]
+    assert "Risk Disclosure" not in text
+
+
 if __name__ == "__main__":
     # Runnable without pytest installed: `python tests/test_pipeline.py`
     import traceback
